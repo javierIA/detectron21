@@ -1,4 +1,5 @@
-import cv2 
+import cv2
+from importlib_metadata import metadata 
 import numpy as np
 import detectron2
 from detectron2.utils.logger import setup_logger
@@ -6,7 +7,7 @@ from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer
-from detectron2.data import MetadataCatalog 
+from detectron2.data import MetadataCatalog,Metadata
 from detectron2.utils.visualizer import ColorMode
 
 
@@ -29,8 +30,9 @@ class Detector:
             self.cfg.merge_from_file(model_zoo.get_config_file("LVISv0.5-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_1x.yaml"))
             self.cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("LVISv0.5-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_1x.yaml")
         elif(model_type=="CUSTOM"):
-            self.cfg.merge_from_file(model_zoo.get_config_file("CUSTOM/mask_rcnn_X_101_32x8d_FPN_1x.yaml"))
-        
+            self.cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
+            self.cfg.MODEL.WEIGHTS = "models/modelos.pth"
+            self.cfg.MODE.NUM_CLASSES = 2
         
         self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
         
@@ -43,7 +45,9 @@ class Detector:
         predictions = self.predictor(image)
         print(predictions["instances"].pred_classes)
         print(predictions["instances"].pred_boxes)
-
+        print(predictions["instances"].scores)
+        #print(predictions["instances"].pred_masks)
+        #metadata = Metadata(thing_classes=["pothole"])
         viz = Visualizer(image[:, :, ::-1], metadata=MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]), scale=1.2,instance_mode=
         ColorMode.IMAGE_BW)
 
